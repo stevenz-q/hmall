@@ -1,0 +1,13 @@
+server:
+  port: 8085
+hm:
+  db:
+    database: hm-pay
+  swagger:
+    title: "黑马商城订单服务接口文档"
+    package: com.hmall.pay.controller
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp功
+  client:
+    default-config: okhttp
