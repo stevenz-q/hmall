@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,31 @@ public class ElasticSearchTest {
                         .filter(QueryBuilders.termQuery("brand", "德亚"))
                         .filter(QueryBuilders.rangeQuery("price").lt(30000))
         );
+        // 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 解析结果
+        parseResponseResult(response);
+    }
+
+    /**
+     * 排序和分页
+     */
+    @Test
+    void testSortAndPage() throws IOException {
+        // 模拟前端传递的分页参数
+        int pageNo = 1, pageSize = 5;
+
+        // 创建request对象
+        SearchRequest request = new SearchRequest("items");
+        // 组织DSL参数
+        // query条件
+        request.source().query(QueryBuilders.matchAllQuery());
+        // 分页
+        request.source().from((pageSize - 1) * pageSize).size(pageSize);
+        // 分页
+        request.source()
+                .sort("sold", SortOrder.DESC)
+                .sort("price", SortOrder.ASC);
         // 发送请求
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         // 解析结果
