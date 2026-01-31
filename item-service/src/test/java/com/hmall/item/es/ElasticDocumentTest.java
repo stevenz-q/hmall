@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * RestClient 操作文档
+ *
  * @author zhaoyq
  * @since 2025/9/26  19:01
  */
@@ -90,6 +92,11 @@ public class ElasticDocumentTest {
         System.out.println(update.getIndex());
     }
 
+    /**
+     * 批量导入文档
+     *
+     * @throws IOException
+     */
     @Test
     void testBulkDoc() throws IOException {
         int pageNo = 1, items = 500;

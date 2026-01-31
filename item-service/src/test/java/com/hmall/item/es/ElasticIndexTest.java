@@ -17,6 +17,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+/**
+ * RestClient 操作索引
+ * @author zhaoyq
+ * @since 2026/1/31 15::09
+ */
 //@SpringBootTest
 public class ElasticIndexTest {
     private RestHighLevelClient client;
