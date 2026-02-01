@@ -160,7 +160,7 @@ public class ElasticSearchTest {
         // query条件
         request.source().query(QueryBuilders.matchAllQuery());
         // 分页
-        request.source().from((pageSize - 1) * pageSize).size(pageSize);
+        request.source().from((pageNo - 1) * pageSize).size(pageSize);
         // 分页
         request.source()
                 .sort("sold", SortOrder.DESC)
