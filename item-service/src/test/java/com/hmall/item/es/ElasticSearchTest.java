@@ -1,7 +1,7 @@
 package com.hmall.item.es;
 
 import cn.hutool.json.JSONUtil;
-import com.hmall.item.domain.po.Item;
+import com.hmall.item.domain.dto.ItemDoc;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
@@ -13,12 +13,15 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * RestClient 查询
@@ -169,6 +172,25 @@ public class ElasticSearchTest {
     }
 
     /**
+     * 高亮显示
+     */
+    @Test
+    void testHighlight() throws IOException {
+        // 创建request对象
+        SearchRequest request = new SearchRequest("items");
+        // 组织DSL参数
+        // query条件
+        request.source().query(QueryBuilders.matchQuery("name", "脱脂牛奶"));
+        // 高亮显示
+        //request.source().highlighter(new HighlightBuilder().field("name").preTags("<em>").postTags("</em>"));
+        request.source().highlighter(SearchSourceBuilder.highlight().field("name").preTags("<em>").postTags("</em>"));
+        // 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 解析结果
+        parseResponseResult(response);
+    }
+
+    /**
      * 解析结果
      *
      * @param response
@@ -184,8 +206,17 @@ public class ElasticSearchTest {
             // 得到source
             String json = hit.getSourceAsString();
             // 转换为ItemDoc
-            Item item = JSONUtil.toBean(json, Item.class);
-            System.out.println(item);
+            ItemDoc doc = JSONUtil.toBean(json, ItemDoc.class);
+            // 处理高亮结果
+            Map<String, HighlightField> hfs = hit.getHighlightFields();
+            if (hfs != null && !hfs.isEmpty()) {
+                //    根据高亮字段名获取高亮结果
+                HighlightField hf = hfs.get("name");
+                //    获取高亮结果，覆盖非高亮结果
+                String hfName = hf.getFragments()[0].string();
+                doc.setName(hfName);
+            }
+            System.out.println(doc);
         }
     }
 }
