@@ -13,6 +13,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -188,6 +192,33 @@ public class ElasticSearchTest {
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         // 解析结果
         parseResponseResult(response);
+    }
+
+    /**
+     * 聚合查询
+     */
+    @Test
+    void testAgg() throws IOException {
+        // 创建request对象
+        SearchRequest request = new SearchRequest("items");
+        // 组织DSL参数
+        // query条件
+        request.source().size(0);
+        // 聚合条件
+        String brandAggName = "brandAgg";
+        request.source().aggregation(AggregationBuilders.terms(brandAggName).field("brand"));
+        // 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 解析结果
+        Aggregations aggregations = response.getAggregations();
+        // 根据聚合名称获取对应的聚合（需要用对应的子类来接收）
+        Terms terms = aggregations.get(brandAggName);
+        List<? extends Terms.Bucket> buckets = terms.getBuckets();
+        for (Terms.Bucket bucket : buckets) {
+            System.out.println("key: " + bucket.getKey());
+            System.out.println("docCount: " + bucket.getDocCount());
+        }
+
     }
 
     /**
